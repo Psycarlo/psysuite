@@ -35,3 +35,6 @@ android
 
 # Typescript
 *.tsbuildinfo
+
+# Uniwind
+uniwind-types.d.ts

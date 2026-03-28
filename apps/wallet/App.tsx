@@ -10,7 +10,7 @@ export default function App() {
   return (
     <Provider>
       <View className="flex-1 items-center justify-center bg-background">
-        <Text className="text-4xl font-bold mb-4">Expense App</Text>
+        <Text className="text-4xl font-bold mb-4">Wallet App</Text>
         <Button onPress={handlePress}>Get Started</Button>
       </View>
     </Provider>

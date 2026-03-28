@@ -1,3 +1,10 @@
+import {
+  InterTight_400Regular,
+  InterTight_500Medium,
+  InterTight_600SemiBold,
+  InterTight_700Bold,
+} from '@expo-google-fonts/inter-tight'
+import { useFonts } from 'expo-font'
 import { HeroUINativeProvider } from 'heroui-native'
 import type { ReactNode } from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -6,8 +13,21 @@ interface ProviderProps {
   children: ReactNode
 }
 
-export const Provider = ({ children }: ProviderProps) => (
-  <GestureHandlerRootView style={{ flex: 1 }}>
-    <HeroUINativeProvider>{children}</HeroUINativeProvider>
-  </GestureHandlerRootView>
-)
+export const Provider = ({ children }: ProviderProps) => {
+  const [fontsLoaded] = useFonts({
+    InterTight_400Regular,
+    InterTight_500Medium,
+    InterTight_600SemiBold,
+    InterTight_700Bold,
+  })
+
+  if (!fontsLoaded) {
+    return null
+  }
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <HeroUINativeProvider>{children}</HeroUINativeProvider>
+    </GestureHandlerRootView>
+  )
+}

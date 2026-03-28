@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 @import 'uniwind';
-@import 'heroui-native/styles';
+@import '../node_modules/heroui-native/lib/module/styles/index.css';
 
 @source '../node_modules/heroui-native/lib';
+
+@theme {
+  --font-normal: 'InterTight_400Regular';
+  --font-medium: 'InterTight_500Medium';
+  --font-semibold: 'InterTight_600SemiBold';
+  --font-bold: 'InterTight_700Bold';
+}

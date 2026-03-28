@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expense",
-    "slug": "expense",
+    "name": "wallet",
+    "slug": "wallet",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,7 +13,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "dev.psysuite.expense"
+      "bundleIdentifier": "dev.psysuite.wallet"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +23,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "dev.psysuite.expense"
+      "package": "dev.psysuite.wallet"
     },
     "web": {
       "favicon": "./assets/favicon.png"
