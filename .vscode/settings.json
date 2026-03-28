@@ -3,6 +3,7 @@
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "emmet.showExpandedAbbreviation": "never",
+  "css.lint.unknownAtRules": "ignore",
   "typescript.tsdk": "node_modules/typescript/lib",
   "[css]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
