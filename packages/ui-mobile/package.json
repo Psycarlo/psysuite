@@ -13,6 +13,10 @@
     "tailwindcss": "^4.0.0",
     "uniwind": "^1.6.1"
   },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~5.9.2"
+  },
   "peerDependencies": {
     "@gorhom/bottom-sheet": ">=5.2.8",
     "react": "*",
