@@ -29,7 +29,19 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "useHermesV1": false
+          },
+          "ios": {
+            "buildReactNativeFromSource": true,
+            "useHermesV1": true
+          }
+        }
+      ]
     ]
   }
 }
