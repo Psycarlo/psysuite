@@ -1,13 +1,10 @@
 import './global.css'
-import { Button, Provider } from '@psysuite/ui-mobile'
+import { Provider } from '@psysuite/ui-mobile'
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, Text, View } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 
 import { initializeDatabase } from '@/db/initialize'
-
-const handlePress = () => {
-  // placeholder
-}
+import { HomeScreen } from '@/screens/home'
 
 export default function App() {
   const [dbReady, setDbReady] = useState(false)
@@ -32,10 +29,7 @@ export default function App() {
 
   return (
     <Provider>
-      <View className="flex-1 items-center justify-center bg-background">
-        <Text className="text-4xl font-bold mb-4">Expense App</Text>
-        <Button onPress={handlePress}>Get Started</Button>
-      </View>
+      <HomeScreen />
     </Provider>
   )
 }

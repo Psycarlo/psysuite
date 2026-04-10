@@ -114,6 +114,65 @@ export const deleteEntry = (db: NitroSQLiteConnection, id: number): void => {
   db.execute('DELETE FROM entries WHERE id = ?', [id])
 }
 
+export const getEntries = (
+  db: NitroSQLiteConnection,
+  startDate?: number,
+  endDate?: number
+): Entry[] => {
+  if (startDate !== undefined && endDate !== undefined) {
+    const result = db.execute<Entry>(
+      'SELECT * FROM entries WHERE date >= ? AND date <= ? ORDER BY date DESC',
+      [startDate, endDate]
+    )
+    return result.rows._array
+  }
+  const result = db.execute<Entry>('SELECT * FROM entries ORDER BY date DESC')
+  return result.rows._array
+}
+
+interface SpendingTotal {
+  total: number | null
+}
+
+export const getTotalSpending = (
+  db: NitroSQLiteConnection,
+  startDate?: number,
+  endDate?: number
+): number => {
+  if (startDate !== undefined && endDate !== undefined) {
+    const result = db.execute<SpendingTotal>(
+      "SELECT SUM(amount) as total FROM entries WHERE type = 'expense' AND date >= ? AND date <= ?",
+      [startDate, endDate]
+    )
+    return result.rows.item(0)?.total ?? 0
+  }
+  const result = db.execute<SpendingTotal>(
+    "SELECT SUM(amount) as total FROM entries WHERE type = 'expense'"
+  )
+  return result.rows.item(0)?.total ?? 0
+}
+
+interface DailySpending {
+  day: number
+  total: number
+}
+
+export const getDailySpending = (
+  db: NitroSQLiteConnection,
+  startDate: number,
+  endDate: number
+): DailySpending[] => {
+  const result = db.execute<DailySpending>(
+    `SELECT date as day, SUM(amount) as total
+     FROM entries
+     WHERE type = 'expense' AND date >= ? AND date <= ?
+     GROUP BY date
+     ORDER BY date`,
+    [startDate, endDate]
+  )
+  return result.rows._array
+}
+
 interface MonthlySummary {
   category_id: number | null
   total: number
