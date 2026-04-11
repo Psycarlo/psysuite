@@ -34,7 +34,9 @@ export const TransactionItem = ({ entry, onPress }: TransactionItemProps) => (
     <View className="flex-1">
       <Text className="text-base font-semibold text-black">{entry.title}</Text>
       <Text className="text-sm text-zinc-400">
-        {entry.category_name ? `${entry.category_name} · ` : ''}
+        {entry.category_name !== null && entry.category_name !== ''
+          ? `${entry.category_name} · `
+          : ''}
         {formatDate(entry.date)}
       </Text>
     </View>

@@ -39,21 +39,24 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
     }
     case 'reset': {
       return {
-        title: '',
         amount: '',
-        date: new Date(),
         categoryId: NONE_VALUE,
-        paymentMethodId: NONE_VALUE
+        date: new Date(),
+        paymentMethodId: NONE_VALUE,
+        title: ''
       }
     }
     case 'populate': {
       return {
-        title: action.entry.title,
         amount: String(action.entry.amount),
-        date: new Date(action.entry.date * 1000),
         categoryId: action.entry.category_id ?? NONE_VALUE,
-        paymentMethodId: action.entry.payment_method_id ?? NONE_VALUE
+        date: new Date(action.entry.date * 1000),
+        paymentMethodId: action.entry.payment_method_id ?? NONE_VALUE,
+        title: action.entry.title
       }
+    }
+    default: {
+      return state
     }
   }
 }

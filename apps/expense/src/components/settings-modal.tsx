@@ -36,7 +36,7 @@ export const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
     accounts.find((a) => a.id === selectedAccountId) ?? accounts[0] ?? null
 
   const handleExport = async () => {
-    if (!selectedAccount) {
+    if (selectedAccount === null) {
       return
     }
     setExporting(true)
@@ -113,10 +113,14 @@ export const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
             )}
 
             <Pressable
-              onPress={handleExport}
-              disabled={!selectedAccount || exporting}
+              onPress={() => {
+                void handleExport()
+              }}
+              disabled={selectedAccount === null || exporting}
               className={`items-center rounded-lg py-3 ${
-                selectedAccount && !exporting ? 'bg-black' : 'bg-zinc-300'
+                selectedAccount !== null && !exporting
+                  ? 'bg-black'
+                  : 'bg-zinc-300'
               }`}
             >
               {exporting ? (

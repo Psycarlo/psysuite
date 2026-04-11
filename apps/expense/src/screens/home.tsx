@@ -86,6 +86,9 @@ const modalReducer = (state: ModalState, action: ModalAction): ModalState => {
     case 'close': {
       return { active: null, editingEntry: null }
     }
+    default: {
+      return state
+    }
   }
 }
 
