@@ -122,17 +122,21 @@ export const getEntries = (
   startDate?: number,
   endDate?: number
 ): Entry[] => {
+  const query = `
+    SELECT e.*, c.name as category_name, pm.name as payment_method_name
+    FROM entries e
+    LEFT JOIN categories c ON e.category_id = c.id
+    LEFT JOIN payment_methods pm ON e.payment_method_id = pm.id
+    WHERE e.account_id = ?`
+
   if (startDate !== undefined && endDate !== undefined) {
     const result = db.execute<Entry>(
-      'SELECT * FROM entries WHERE account_id = ? AND date >= ? AND date <= ? ORDER BY date DESC',
+      `${query} AND e.date >= ? AND e.date <= ? ORDER BY e.date DESC`,
       [accountId, startDate, endDate]
     )
     return result.rows._array
   }
-  const result = db.execute<Entry>(
-    'SELECT * FROM entries WHERE account_id = ? ORDER BY date DESC',
-    [accountId]
-  )
+  const result = db.execute<Entry>(`${query} ORDER BY e.date DESC`, [accountId])
   return result.rows._array
 }
 

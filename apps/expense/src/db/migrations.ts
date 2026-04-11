@@ -1,6 +1,7 @@
 import type { NitroSQLiteConnection } from 'react-native-nitro-sqlite'
 
 import { v001Initial } from './migrations/v001-initial'
+import { v002CategoriesPaymentMethods } from './migrations/v002-categories-payment-methods'
 
 interface Migration {
   version: number
@@ -9,7 +10,12 @@ interface Migration {
 }
 
 const migrations: Migration[] = [
-  { name: 'initial', up: v001Initial, version: 1 }
+  { name: 'initial', up: v001Initial, version: 1 },
+  {
+    name: 'categories-payment-methods',
+    up: v002CategoriesPaymentMethods,
+    version: 2
+  }
 ]
 
 const getCurrentVersion = (db: NitroSQLiteConnection): number => {

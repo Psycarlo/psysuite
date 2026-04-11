@@ -13,6 +13,8 @@ export interface Entry {
   date: number
   created_at: number
   updated_at: number
+  category_name: string | null
+  payment_method_name: string | null
 }
 
 export interface CreateEntryParams {

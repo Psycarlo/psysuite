@@ -27,9 +27,10 @@ export const SearchModal = ({
   const insets = useSafeAreaInsets()
   const [query, setQuery] = useState('')
 
-  const results = query.trim().length > 0
-    ? searchEntries(getDatabase(), accountId, query.trim())
-    : []
+  const results =
+    query.trim().length > 0
+      ? searchEntries(getDatabase(), accountId, query.trim())
+      : []
 
   const handleClose = () => {
     setQuery('')
@@ -67,7 +68,6 @@ export const SearchModal = ({
           renderItem={renderItem}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ paddingHorizontal: 20 }}
-          estimatedItemSize={64}
           ListEmptyComponent={
             <View className="items-center py-10">
               <Text className="text-zinc-400">

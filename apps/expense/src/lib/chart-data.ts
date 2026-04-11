@@ -13,7 +13,20 @@ export interface ChartPoint {
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const MONTH_LETTERS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
+const MONTH_LETTERS = [
+  'J',
+  'F',
+  'M',
+  'A',
+  'M',
+  'J',
+  'J',
+  'A',
+  'S',
+  'O',
+  'N',
+  'D'
+]
 
 const buildWeekData = (data: DailySpending[]): ChartPoint[] => {
   const buckets = new Map<string, number>()
@@ -87,7 +100,8 @@ const buildAllTimeData = (data: DailySpending[]): ChartPoint[] => {
 
   const currentYear = new Date().getFullYear()
   const years = [...buckets.keys()].toSorted((a, b) => a - b)
-  const startYear = years.length > 0 ? Math.min(years[0], currentYear - 3) : currentYear - 3
+  const startYear =
+    years.length > 0 ? Math.min(years[0], currentYear - 3) : currentYear - 3
 
   const points: ChartPoint[] = []
   for (let y = startYear; y <= currentYear; y += 1) {
@@ -103,8 +117,12 @@ const buildTodayData = (data: DailySpending[]): ChartPoint[] => {
 
 export const formatYLabel = (value: string | number): string => {
   const n = Number(value)
-  if (n >= 1_000_000) return `${+(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `${+(n / 1_000).toFixed(1)}k`
+  if (n >= 1_000_000) {
+    return `${+(n / 1_000_000).toFixed(1)}M`
+  }
+  if (n >= 1000) {
+    return `${+(n / 1000).toFixed(1)}k`
+  }
   return `${Math.round(n)}`
 }
 

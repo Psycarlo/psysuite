@@ -8,7 +8,7 @@ import { AccountModal } from '@/components/account-modal'
 import { AnimatedAmount } from '@/components/animated-amount'
 import { Fab } from '@/components/fab'
 import { FilterModal } from '@/components/filter-modal'
-import { NewExpenseModal } from '@/components/new-expense-modal'
+import { ExpenseModal } from '@/components/new-expense-modal'
 import { SearchModal } from '@/components/search-modal'
 import { SettingsModal } from '@/components/settings-modal'
 import { SpendingChart } from '@/components/spending-chart'
@@ -19,12 +19,15 @@ import {
   deleteAccount,
   getAccounts
 } from '@/db/repositories/accounts'
+import { getCategories } from '@/db/repositories/categories'
 import {
   createEntry,
   getDailySpending,
   getEntries,
-  getTotalSpending
+  getTotalSpending,
+  updateEntry
 } from '@/db/repositories/entries'
+import { getPaymentMethods } from '@/db/repositories/payment-methods'
 import { buildChartData } from '@/lib/chart-data'
 import { getDateRange, getPeriodLabel } from '@/lib/period'
 import type { Account } from '@/types/account'
@@ -60,10 +63,6 @@ const loadData = (period: Period, accountId: number) => {
   return { chartData, entries, total }
 }
 
-const renderItem = ({ item }: { item: Entry }) => (
-  <TransactionItem entry={item} />
-)
-
 export const HomeScreen = () => {
   const insets = useSafeAreaInsets()
   const db = getDatabase()
@@ -75,8 +74,11 @@ export const HomeScreen = () => {
   )
 
   const [data, setData] = useState(() => loadData(period, selectedAccountId))
+  const categories = getCategories(db, 'expense')
+  const paymentMethods = getPaymentMethods(db)
 
   const [expenseModalVisible, setExpenseModalVisible] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
   const [accountModalVisible, setAccountModalVisible] = useState(false)
   const [searchModalVisible, setSearchModalVisible] = useState(false)
@@ -86,16 +88,45 @@ export const HomeScreen = () => {
     setData(loadData(newPeriod ?? period, selectedAccountId))
   }
 
-  const handleSaveExpense = (title: string, amount: number, date: number) => {
-    createEntry(db, {
-      account_id: selectedAccountId,
-      amount,
-      date,
-      title,
-      type: 'expense'
-    })
+  const handleSaveExpense = (params: {
+    title: string
+    amount: number
+    date: number
+    category_id: number | null
+    payment_method_id: number | null
+  }) => {
+    if (editingEntry) {
+      updateEntry(db, editingEntry.id, {
+        amount: params.amount,
+        category_id: params.category_id,
+        date: params.date,
+        payment_method_id: params.payment_method_id,
+        title: params.title
+      })
+    } else {
+      createEntry(db, {
+        account_id: selectedAccountId,
+        amount: params.amount,
+        category_id: params.category_id,
+        date: params.date,
+        payment_method_id: params.payment_method_id,
+        title: params.title,
+        type: 'expense'
+      })
+    }
     setExpenseModalVisible(false)
+    setEditingEntry(null)
     refreshData()
+  }
+
+  const handleEntryPress = (entry: Entry) => {
+    setEditingEntry(entry)
+    setExpenseModalVisible(true)
+  }
+
+  const handleCloseModal = () => {
+    setExpenseModalVisible(false)
+    setEditingEntry(null)
   }
 
   const handlePeriodSelect = (newPeriod: Period) => {
@@ -165,7 +196,9 @@ export const HomeScreen = () => {
 
       <FlashList
         data={data.entries}
-        renderItem={renderItem}
+        renderItem={({ item }) => (
+          <TransactionItem entry={item} onPress={handleEntryPress} />
+        )}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ paddingHorizontal: 20 }}
         ListHeaderComponent={
@@ -194,11 +227,12 @@ export const HomeScreen = () => {
         }}
       />
 
-      <NewExpenseModal
+      <ExpenseModal
         visible={expenseModalVisible}
-        onClose={() => {
-          setExpenseModalVisible(false)
-        }}
+        entry={editingEntry}
+        categories={categories}
+        paymentMethods={paymentMethods}
+        onClose={handleCloseModal}
         onSave={handleSaveExpense}
       />
       <FilterModal
