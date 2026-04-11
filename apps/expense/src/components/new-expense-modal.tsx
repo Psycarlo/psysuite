@@ -1,5 +1,5 @@
 import { DatePicker, Host, Picker, Text as PickerText } from '@expo/ui/swift-ui'
-import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
+import { lineLimit, pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
 import { useReducer } from 'react'
 import {
   KeyboardAvoidingView,
@@ -164,7 +164,7 @@ export const ExpenseModal = ({
             <View>
               <Text className="text-sm text-zinc-400 mb-2">Title</Text>
               <TextInput
-                className="bg-zinc-50 rounded-lg px-4 py-3 text-base text-black"
+                className="bg-zinc-50 rounded-lg px-4 pt-3 pb-4 text-base text-black"
                 placeholder="What did you spend on?"
                 placeholderTextColor="#a1a1aa"
                 value={form.title}
@@ -205,13 +205,13 @@ export const ExpenseModal = ({
 
             <View>
               <Text className="text-sm text-zinc-400 mb-2">Category</Text>
-              <Host matchContents>
+              <Host matchContents={{ vertical: true }}>
                 <Picker
                   selection={form.categoryId}
                   onSelectionChange={(value) => {
                     dispatch({ fields: { categoryId: value }, type: 'update' })
                   }}
-                  modifiers={[pickerStyle('menu')]}
+                  modifiers={[pickerStyle('menu'), lineLimit(1)]}
                 >
                   <PickerText modifiers={[tag(NONE_VALUE)]}>None</PickerText>
                   {categories.map((c) => (
@@ -225,7 +225,7 @@ export const ExpenseModal = ({
 
             <View>
               <Text className="text-sm text-zinc-400 mb-2">Payment method</Text>
-              <Host matchContents>
+              <Host matchContents={{ vertical: true }}>
                 <Picker
                   selection={form.paymentMethodId}
                   onSelectionChange={(value) => {
@@ -234,7 +234,7 @@ export const ExpenseModal = ({
                       type: 'update'
                     })
                   }}
-                  modifiers={[pickerStyle('menu')]}
+                  modifiers={[pickerStyle('menu'), lineLimit(1)]}
                 >
                   <PickerText modifiers={[tag(NONE_VALUE)]}>None</PickerText>
                   {paymentMethods.map((pm) => (

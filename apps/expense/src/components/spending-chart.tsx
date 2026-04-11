@@ -16,7 +16,9 @@ interface SpendingChartProps {
 export const SpendingChart = ({ data }: SpendingChartProps) => {
   const font = useFont(fontFile, 12)
 
-  if (data.length === 0) {
+  const maxAmount = data.length > 0 ? Math.max(...data.map((d) => d.amount)) : 0
+
+  if (maxAmount === 0) {
     return <View className="h-44" />
   }
 
@@ -26,6 +28,7 @@ export const SpendingChart = ({ data }: SpendingChartProps) => {
         data={data}
         xKey="label"
         yKeys={['amount']}
+        domain={{ y: [0, maxAmount * 1.2] }}
         domainPadding={{ left: 30, right: 30 }}
         axisOptions={{
           axisSide: { x: 'bottom', y: 'right' },
