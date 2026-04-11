@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
-import { ChevronDown, ListFilter, Search } from 'lucide-react-native'
+import { ChevronDown, ListFilter, Search, Settings } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -9,6 +9,8 @@ import { AnimatedAmount } from '@/components/animated-amount'
 import { Fab } from '@/components/fab'
 import { FilterModal } from '@/components/filter-modal'
 import { NewExpenseModal } from '@/components/new-expense-modal'
+import { SearchModal } from '@/components/search-modal'
+import { SettingsModal } from '@/components/settings-modal'
 import { SpendingChart } from '@/components/spending-chart'
 import { TransactionItem } from '@/components/transaction-item'
 import { getDatabase } from '@/db/connection'
@@ -77,6 +79,8 @@ export const HomeScreen = () => {
   const [expenseModalVisible, setExpenseModalVisible] = useState(false)
   const [filterModalVisible, setFilterModalVisible] = useState(false)
   const [accountModalVisible, setAccountModalVisible] = useState(false)
+  const [searchModalVisible, setSearchModalVisible] = useState(false)
+  const [settingsModalVisible, setSettingsModalVisible] = useState(false)
 
   const refreshData = (newPeriod?: Period) => {
     setData(loadData(newPeriod ?? period, selectedAccountId))
@@ -135,7 +139,11 @@ export const HomeScreen = () => {
           <ChevronDown size={16} color="#000" />
         </Pressable>
         <View className="flex-row items-center gap-4">
-          <Pressable>
+          <Pressable
+            onPress={() => {
+              setSearchModalVisible(true)
+            }}
+          >
             <Search size={22} color="#000" />
           </Pressable>
           <Pressable
@@ -144,6 +152,13 @@ export const HomeScreen = () => {
             }}
           >
             <ListFilter size={22} color="#000" />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              setSettingsModalVisible(true)
+            }}
+          >
+            <Settings size={22} color="#000" />
           </Pressable>
         </View>
       </View>
@@ -203,6 +218,19 @@ export const HomeScreen = () => {
         onDelete={handleDeleteAccount}
         onClose={() => {
           setAccountModalVisible(false)
+        }}
+      />
+      <SearchModal
+        visible={searchModalVisible}
+        accountId={selectedAccountId}
+        onClose={() => {
+          setSearchModalVisible(false)
+        }}
+      />
+      <SettingsModal
+        visible={settingsModalVisible}
+        onClose={() => {
+          setSettingsModalVisible(false)
         }}
       />
     </View>

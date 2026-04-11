@@ -11,36 +11,24 @@ export interface ChartPoint {
   amount: number
 }
 
-const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const SHORT_MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec'
-]
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const MONTH_LETTERS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
 
 const buildWeekData = (data: DailySpending[]): ChartPoint[] => {
   const buckets = new Map<string, number>()
 
-  for (let i = 0; i < 7; i += 1) {
-    buckets.set(SHORT_DAYS[i], 0)
+  for (const day of WEEK_DAYS) {
+    buckets.set(day, 0)
   }
 
   for (const entry of data) {
     const date = new Date(entry.day * 1000)
-    const dayName = SHORT_DAYS[date.getDay()]
+    const dayName = DAY_NAMES[date.getDay()]
     buckets.set(dayName, (buckets.get(dayName) ?? 0) + entry.total)
   }
 
-  return SHORT_DAYS.map((day) => ({
+  return WEEK_DAYS.map((day) => ({
     amount: buckets.get(day) ?? 0,
     label: day
   }))
@@ -53,17 +41,22 @@ const buildMonthData = (data: DailySpending[]): ChartPoint[] => {
     now.getMonth() + 1,
     0
   ).getDate()
-  const buckets = new Map<number, number>()
+  const dayBuckets = new Map<number, number>()
 
   for (const entry of data) {
     const date = new Date(entry.day * 1000)
     const day = date.getDate()
-    buckets.set(day, (buckets.get(day) ?? 0) + entry.total)
+    dayBuckets.set(day, (dayBuckets.get(day) ?? 0) + entry.total)
   }
 
   const points: ChartPoint[] = []
-  for (let d = 1; d <= daysInMonth; d += 1) {
-    points.push({ amount: buckets.get(d) ?? 0, label: `${d}` })
+  for (let start = 1; start <= daysInMonth; start += 7) {
+    const end = Math.min(start + 6, daysInMonth)
+    let total = 0
+    for (let d = start; d <= end; d += 1) {
+      total += dayBuckets.get(d) ?? 0
+    }
+    points.push({ amount: total, label: `${start}-${end}` })
   }
   return points
 }
@@ -77,9 +70,9 @@ const buildYearData = (data: DailySpending[]): ChartPoint[] => {
     buckets.set(month, (buckets.get(month) ?? 0) + entry.total)
   }
 
-  return SHORT_MONTHS.map((name, i) => ({
+  return MONTH_LETTERS.map((letter, i) => ({
     amount: buckets.get(i) ?? 0,
-    label: name
+    label: letter
   }))
 }
 
@@ -92,21 +85,27 @@ const buildAllTimeData = (data: DailySpending[]): ChartPoint[] => {
     buckets.set(year, (buckets.get(year) ?? 0) + entry.total)
   }
 
+  const currentYear = new Date().getFullYear()
   const years = [...buckets.keys()].toSorted((a, b) => a - b)
-  if (years.length === 0) {
-    const currentYear = new Date().getFullYear()
-    return [{ amount: 0, label: `${currentYear}` }]
-  }
+  const startYear = years.length > 0 ? Math.min(years[0], currentYear - 3) : currentYear - 3
 
-  return years.map((year) => ({
-    amount: buckets.get(year) ?? 0,
-    label: `${year}`
-  }))
+  const points: ChartPoint[] = []
+  for (let y = startYear; y <= currentYear; y += 1) {
+    points.push({ amount: buckets.get(y) ?? 0, label: `${y}` })
+  }
+  return points
 }
 
 const buildTodayData = (data: DailySpending[]): ChartPoint[] => {
   const total = data.reduce((sum, d) => sum + d.total, 0)
   return [{ amount: total, label: 'Today' }]
+}
+
+export const formatYLabel = (value: string | number): string => {
+  const n = Number(value)
+  if (n >= 1_000_000) return `${+(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${+(n / 1_000).toFixed(1)}k`
+  return `${Math.round(n)}`
 }
 
 export const buildChartData = (

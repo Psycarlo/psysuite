@@ -136,6 +136,18 @@ export const getEntries = (
   return result.rows._array
 }
 
+export const searchEntries = (
+  db: NitroSQLiteConnection,
+  accountId: number,
+  query: string
+): Entry[] => {
+  const result = db.execute<Entry>(
+    "SELECT * FROM entries WHERE account_id = ? AND title LIKE '%' || ? || '%' ORDER BY date DESC",
+    [accountId, query]
+  )
+  return result.rows._array
+}
+
 interface SpendingTotal {
   [key: string]: number | null
   total: number | null
