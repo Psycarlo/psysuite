@@ -1,6 +1,6 @@
 import { DatePicker, Host, Picker, Text as PickerText } from '@expo/ui/swift-ui'
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers'
-import { useState } from 'react'
+import { useReducer } from 'react'
 import {
   KeyboardAvoidingView,
   Modal,
@@ -18,6 +18,45 @@ import type { Entry } from '@/types/entry'
 import type { PaymentMethod } from '@/types/payment-method'
 
 const NONE_VALUE = 0
+
+interface FormState {
+  title: string
+  amount: string
+  date: Date
+  categoryId: number
+  paymentMethodId: number
+}
+
+type FormAction =
+  | { type: 'update'; fields: Partial<FormState> }
+  | { type: 'reset' }
+  | { type: 'populate'; entry: Entry }
+
+const formReducer = (state: FormState, action: FormAction): FormState => {
+  switch (action.type) {
+    case 'update': {
+      return { ...state, ...action.fields }
+    }
+    case 'reset': {
+      return {
+        title: '',
+        amount: '',
+        date: new Date(),
+        categoryId: NONE_VALUE,
+        paymentMethodId: NONE_VALUE
+      }
+    }
+    case 'populate': {
+      return {
+        title: action.entry.title,
+        amount: String(action.entry.amount),
+        date: new Date(action.entry.date * 1000),
+        categoryId: action.entry.category_id ?? NONE_VALUE,
+        paymentMethodId: action.entry.payment_method_id ?? NONE_VALUE
+      }
+    }
+  }
+}
 
 interface ExpenseModalProps {
   visible: boolean
@@ -45,52 +84,43 @@ export const ExpenseModal = ({
   const insets = useSafeAreaInsets()
   const isEditing = entry !== null && entry !== undefined
 
-  const [title, setTitle] = useState('')
-  const [amount, setAmount] = useState('')
-  const [date, setDate] = useState(new Date())
-  const [categoryId, setCategoryId] = useState<number>(NONE_VALUE)
-  const [paymentMethodId, setPaymentMethodId] = useState<number>(NONE_VALUE)
+  const [form, dispatch] = useReducer(formReducer, {
+    amount: '',
+    categoryId: NONE_VALUE,
+    date: new Date(),
+    paymentMethodId: NONE_VALUE,
+    title: ''
+  })
 
-  const canSave = title.trim().length > 0 && Number.parseFloat(amount) > 0
+  const canSave =
+    form.title.trim().length > 0 && Number.parseFloat(form.amount) > 0
 
   const populateForm = () => {
     if (entry) {
-      setTitle(entry.title)
-      setAmount(String(entry.amount))
-      setDate(new Date(entry.date * 1000))
-      setCategoryId(entry.category_id ?? NONE_VALUE)
-      setPaymentMethodId(entry.payment_method_id ?? NONE_VALUE)
+      dispatch({ entry, type: 'populate' })
     } else {
-      resetForm()
+      dispatch({ type: 'reset' })
     }
-  }
-
-  const resetForm = () => {
-    setTitle('')
-    setAmount('')
-    setDate(new Date())
-    setCategoryId(NONE_VALUE)
-    setPaymentMethodId(NONE_VALUE)
   }
 
   const handleSave = () => {
     if (!canSave) {
       return
     }
-    const timestamp = Math.floor(date.getTime() / 1000)
+    const timestamp = Math.floor(form.date.getTime() / 1000)
     onSave({
-      amount: Number.parseFloat(amount),
-      category_id: categoryId === NONE_VALUE ? null : categoryId,
+      amount: Number.parseFloat(form.amount),
+      category_id: form.categoryId === NONE_VALUE ? null : form.categoryId,
       date: timestamp,
       payment_method_id:
-        paymentMethodId === NONE_VALUE ? null : paymentMethodId,
-      title: title.trim()
+        form.paymentMethodId === NONE_VALUE ? null : form.paymentMethodId,
+      title: form.title.trim()
     })
-    resetForm()
+    dispatch({ type: 'reset' })
   }
 
   const handleClose = () => {
-    resetForm()
+    dispatch({ type: 'reset' })
     onClose()
   }
 
@@ -134,8 +164,10 @@ export const ExpenseModal = ({
                 className="bg-zinc-50 rounded-lg px-4 py-3 text-base text-black"
                 placeholder="What did you spend on?"
                 placeholderTextColor="#a1a1aa"
-                value={title}
-                onChangeText={setTitle}
+                value={form.title}
+                onChangeText={(value) => {
+                  dispatch({ fields: { title: value }, type: 'update' })
+                }}
                 autoFocus={!isEditing}
               />
             </View>
@@ -146,8 +178,10 @@ export const ExpenseModal = ({
                 className="bg-zinc-50 rounded-lg px-4 py-3 text-base text-black"
                 placeholder="0.00"
                 placeholderTextColor="#a1a1aa"
-                value={amount}
-                onChangeText={setAmount}
+                value={form.amount}
+                onChangeText={(value) => {
+                  dispatch({ fields: { amount: value }, type: 'update' })
+                }}
                 keyboardType="decimal-pad"
               />
             </View>
@@ -157,9 +191,11 @@ export const ExpenseModal = ({
               <Host matchContents>
                 <DatePicker
                   title="Date"
-                  selection={date}
+                  selection={form.date}
                   displayedComponents={['date']}
-                  onDateChange={setDate}
+                  onDateChange={(value) => {
+                    dispatch({ fields: { date: value }, type: 'update' })
+                  }}
                 />
               </Host>
             </View>
@@ -168,8 +204,10 @@ export const ExpenseModal = ({
               <Text className="text-sm text-zinc-400 mb-2">Category</Text>
               <Host matchContents>
                 <Picker
-                  selection={categoryId}
-                  onSelectionChange={setCategoryId}
+                  selection={form.categoryId}
+                  onSelectionChange={(value) => {
+                    dispatch({ fields: { categoryId: value }, type: 'update' })
+                  }}
                   modifiers={[pickerStyle('menu')]}
                 >
                   <PickerText modifiers={[tag(NONE_VALUE)]}>None</PickerText>
@@ -186,8 +224,13 @@ export const ExpenseModal = ({
               <Text className="text-sm text-zinc-400 mb-2">Payment method</Text>
               <Host matchContents>
                 <Picker
-                  selection={paymentMethodId}
-                  onSelectionChange={setPaymentMethodId}
+                  selection={form.paymentMethodId}
+                  onSelectionChange={(value) => {
+                    dispatch({
+                      fields: { paymentMethodId: value },
+                      type: 'update'
+                    })
+                  }}
                   modifiers={[pickerStyle('menu')]}
                 >
                   <PickerText modifiers={[tag(NONE_VALUE)]}>None</PickerText>

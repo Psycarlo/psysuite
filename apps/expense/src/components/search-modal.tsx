@@ -62,7 +62,6 @@ export const SearchModal = ({
             <Text className="text-base text-blue-500">Cancel</Text>
           </Pressable>
         </View>
-
         <FlashList
           data={results}
           renderItem={renderItem}

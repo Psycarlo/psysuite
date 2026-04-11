@@ -20,9 +20,13 @@ const formatDate = (timestamp: number): string => {
 export const TransactionItem = ({ entry, onPress }: TransactionItemProps) => (
   <Pressable
     className="flex-row items-center py-3"
-    onPress={onPress ? () => {
-      onPress(entry)
-    } : undefined}
+    onPress={
+      onPress
+        ? () => {
+            onPress(entry)
+          }
+        : undefined
+    }
   >
     <View className="w-10 h-10 rounded-xl bg-zinc-100 items-center justify-center mr-3">
       <Receipt size={20} color="#000" />

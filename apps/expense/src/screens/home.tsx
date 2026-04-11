@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { ChevronDown, ListFilter, Search, Settings } from 'lucide-react-native'
-import { useState } from 'react'
+import { useReducer, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -63,6 +63,32 @@ const loadData = (period: Period, accountId: number) => {
   return { chartData, entries, total }
 }
 
+type ModalName = 'expense' | 'filter' | 'account' | 'search' | 'settings'
+
+interface ModalState {
+  active: ModalName | null
+  editingEntry: Entry | null
+}
+
+type ModalAction =
+  | { type: 'open'; modal: ModalName }
+  | { type: 'edit'; entry: Entry }
+  | { type: 'close' }
+
+const modalReducer = (state: ModalState, action: ModalAction): ModalState => {
+  switch (action.type) {
+    case 'open': {
+      return { active: action.modal, editingEntry: null }
+    }
+    case 'edit': {
+      return { active: 'expense', editingEntry: action.entry }
+    }
+    case 'close': {
+      return { active: null, editingEntry: null }
+    }
+  }
+}
+
 export const HomeScreen = () => {
   const insets = useSafeAreaInsets()
   const db = getDatabase()
@@ -74,15 +100,13 @@ export const HomeScreen = () => {
   )
 
   const [data, setData] = useState(() => loadData(period, selectedAccountId))
+  const [modal, dispatch] = useReducer(modalReducer, {
+    active: null,
+    editingEntry: null
+  })
+
   const categories = getCategories(db, 'expense')
   const paymentMethods = getPaymentMethods(db)
-
-  const [expenseModalVisible, setExpenseModalVisible] = useState(false)
-  const [editingEntry, setEditingEntry] = useState<Entry | null>(null)
-  const [filterModalVisible, setFilterModalVisible] = useState(false)
-  const [accountModalVisible, setAccountModalVisible] = useState(false)
-  const [searchModalVisible, setSearchModalVisible] = useState(false)
-  const [settingsModalVisible, setSettingsModalVisible] = useState(false)
 
   const refreshData = (newPeriod?: Period) => {
     setData(loadData(newPeriod ?? period, selectedAccountId))
@@ -95,8 +119,8 @@ export const HomeScreen = () => {
     category_id: number | null
     payment_method_id: number | null
   }) => {
-    if (editingEntry) {
-      updateEntry(db, editingEntry.id, {
+    if (modal.editingEntry) {
+      updateEntry(db, modal.editingEntry.id, {
         amount: params.amount,
         category_id: params.category_id,
         date: params.date,
@@ -114,19 +138,12 @@ export const HomeScreen = () => {
         type: 'expense'
       })
     }
-    setExpenseModalVisible(false)
-    setEditingEntry(null)
+    dispatch({ type: 'close' })
     refreshData()
   }
 
   const handleEntryPress = (entry: Entry) => {
-    setEditingEntry(entry)
-    setExpenseModalVisible(true)
-  }
-
-  const handleCloseModal = () => {
-    setExpenseModalVisible(false)
-    setEditingEntry(null)
+    dispatch({ entry, type: 'edit' })
   }
 
   const handlePeriodSelect = (newPeriod: Period) => {
@@ -153,6 +170,10 @@ export const HomeScreen = () => {
     setData(loadData(period, id))
   }
 
+  const renderItem = ({ item }: { item: Entry }) => (
+    <TransactionItem entry={item} onPress={handleEntryPress} />
+  )
+
   const selectedAccount = accounts.find((a) => a.id === selectedAccountId)
 
   return (
@@ -160,7 +181,7 @@ export const HomeScreen = () => {
       <View className="flex-row items-center justify-between px-5 py-3">
         <Pressable
           onPress={() => {
-            setAccountModalVisible(true)
+            dispatch({ modal: 'account', type: 'open' })
           }}
           className="flex-row items-center gap-1.5 border border-zinc-200 rounded-full px-4 py-2"
         >
@@ -172,21 +193,21 @@ export const HomeScreen = () => {
         <View className="flex-row items-center gap-4">
           <Pressable
             onPress={() => {
-              setSearchModalVisible(true)
+              dispatch({ modal: 'search', type: 'open' })
             }}
           >
             <Search size={22} color="#000" />
           </Pressable>
           <Pressable
             onPress={() => {
-              setFilterModalVisible(true)
+              dispatch({ modal: 'filter', type: 'open' })
             }}
           >
             <ListFilter size={22} color="#000" />
           </Pressable>
           <Pressable
             onPress={() => {
-              setSettingsModalVisible(true)
+              dispatch({ modal: 'settings', type: 'open' })
             }}
           >
             <Settings size={22} color="#000" />
@@ -196,9 +217,7 @@ export const HomeScreen = () => {
 
       <FlashList
         data={data.entries}
-        renderItem={({ item }) => (
-          <TransactionItem entry={item} onPress={handleEntryPress} />
-        )}
+        renderItem={renderItem}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ paddingHorizontal: 20 }}
         ListHeaderComponent={
@@ -223,48 +242,50 @@ export const HomeScreen = () => {
 
       <Fab
         onPress={() => {
-          setExpenseModalVisible(true)
+          dispatch({ modal: 'expense', type: 'open' })
         }}
       />
 
       <ExpenseModal
-        visible={expenseModalVisible}
-        entry={editingEntry}
+        visible={modal.active === 'expense'}
+        entry={modal.editingEntry}
         categories={categories}
         paymentMethods={paymentMethods}
-        onClose={handleCloseModal}
+        onClose={() => {
+          dispatch({ type: 'close' })
+        }}
         onSave={handleSaveExpense}
       />
       <FilterModal
-        visible={filterModalVisible}
+        visible={modal.active === 'filter'}
         selected={period}
         onSelect={handlePeriodSelect}
         onClose={() => {
-          setFilterModalVisible(false)
+          dispatch({ type: 'close' })
         }}
       />
       <AccountModal
-        visible={accountModalVisible}
+        visible={modal.active === 'account'}
         accounts={accounts}
         selectedId={selectedAccountId}
         onSelect={handleSelectAccount}
         onCreate={handleCreateAccount}
         onDelete={handleDeleteAccount}
         onClose={() => {
-          setAccountModalVisible(false)
+          dispatch({ type: 'close' })
         }}
       />
       <SearchModal
-        visible={searchModalVisible}
+        visible={modal.active === 'search'}
         accountId={selectedAccountId}
         onClose={() => {
-          setSearchModalVisible(false)
+          dispatch({ type: 'close' })
         }}
       />
       <SettingsModal
-        visible={settingsModalVisible}
+        visible={modal.active === 'settings'}
         onClose={() => {
-          setSettingsModalVisible(false)
+          dispatch({ type: 'close' })
         }}
       />
     </View>
