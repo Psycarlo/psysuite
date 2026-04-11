@@ -97,9 +97,9 @@ export const createRecurringEntry = (
       now
     ]
   )
-  return result.insertId
-    ? getRecurringEntryById(db, result.insertId)
-    : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getRecurringEntryById(db, result.insertId)
 }
 
 export const updateRecurringEntry = (
@@ -164,13 +164,10 @@ export const advanceRecurringEntry = (
     return
   }
 
-  const next = computeNextOccurrence(
-    entry.next_occurrence,
-    entry.frequency as RecurringFrequency
-  )
+  const next = computeNextOccurrence(entry.next_occurrence, entry.frequency)
   const now = Math.floor(Date.now() / 1000)
 
-  if (entry.end_date && next > entry.end_date) {
+  if (entry.end_date !== null && next > entry.end_date) {
     db.execute(
       'UPDATE recurring_entries SET is_active = 0, updated_at = ? WHERE id = ?',
       [now, id]

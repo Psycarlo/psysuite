@@ -1,6 +1,7 @@
 export type EntryType = 'expense' | 'income' | 'transfer'
 
 export interface Entry {
+  [key: string]: number | string | null
   id: number
   account_id: number
   category_id: number | null

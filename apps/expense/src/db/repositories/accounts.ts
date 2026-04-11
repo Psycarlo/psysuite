@@ -46,7 +46,9 @@ export const createAccount = (
       now
     ]
   )
-  return result.insertId ? getAccountById(db, result.insertId) : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getAccountById(db, result.insertId)
 }
 
 export const updateAccount = (

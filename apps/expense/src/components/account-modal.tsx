@@ -30,7 +30,9 @@ export const AccountModal = ({
 
   const handleCreate = () => {
     const trimmed = newName.trim()
-    if (trimmed.length === 0) return
+    if (trimmed.length === 0) {
+      return
+    }
     onCreate(trimmed)
     setNewName('')
     setShowCreate(false)
@@ -41,11 +43,13 @@ export const AccountModal = ({
       'Delete account',
       `Are you sure you want to delete "${account.name}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { style: 'cancel', text: 'Cancel' },
         {
-          text: 'Delete',
+          onPress: () => {
+            onDelete(account.id)
+          },
           style: 'destructive',
-          onPress: () => onDelete(account.id)
+          text: 'Delete'
         }
       ]
     )
@@ -69,7 +73,11 @@ export const AccountModal = ({
             <Text className="text-base text-blue-500">Cancel</Text>
           </Pressable>
           <Text className="text-base font-semibold text-black">Accounts</Text>
-          <Pressable onPress={() => setShowCreate(!showCreate)}>
+          <Pressable
+            onPress={() => {
+              setShowCreate(!showCreate)
+            }}
+          >
             <Plus size={22} color="#3b82f6" />
           </Pressable>
         </View>
@@ -105,7 +113,9 @@ export const AccountModal = ({
               className="flex-row items-center justify-between py-4 border-b border-zinc-100"
             >
               <Pressable
-                onPress={() => handleSelect(account.id)}
+                onPress={() => {
+                  handleSelect(account.id)
+                }}
                 className="flex-1 flex-row items-center gap-3"
               >
                 {selectedId === account.id && (
@@ -118,7 +128,11 @@ export const AccountModal = ({
                 </Text>
               </Pressable>
               {accounts.length > 1 && (
-                <Pressable onPress={() => handleDelete(account)}>
+                <Pressable
+                  onPress={() => {
+                    handleDelete(account)
+                  }}
+                >
                   <Trash2 size={18} color="#ef4444" />
                 </Pressable>
               )}

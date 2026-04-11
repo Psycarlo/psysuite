@@ -1,4 +1,5 @@
 export interface Tag {
+  [key: string]: number | string | null
   id: number
   name: string
   color: string | null

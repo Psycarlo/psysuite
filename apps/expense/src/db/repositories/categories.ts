@@ -11,7 +11,7 @@ export const getCategories = (
   db: NitroSQLiteConnection,
   type?: CategoryType
 ): Category[] => {
-  if (type) {
+  if (type !== undefined) {
     const result = db.execute<Category>(
       'SELECT * FROM categories WHERE is_archived = 0 AND type = ? ORDER BY sort_order, name',
       [type]
@@ -63,7 +63,9 @@ export const createCategory = (
       now
     ]
   )
-  return result.insertId ? getCategoryById(db, result.insertId) : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getCategoryById(db, result.insertId)
 }
 
 export const updateCategory = (

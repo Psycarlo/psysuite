@@ -35,7 +35,9 @@ export const createPaymentMethod = (
     'INSERT INTO payment_methods (name, type, icon, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
     [params.name, params.type ?? 'other', params.icon ?? null, now, now]
   )
-  return result.insertId ? getPaymentMethodById(db, result.insertId) : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getPaymentMethodById(db, result.insertId)
 }
 
 export const updatePaymentMethod = (

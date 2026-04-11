@@ -1,4 +1,5 @@
 export interface Transfer {
+  [key: string]: number | string | null
   id: number
   from_entry_id: number
   to_entry_id: number

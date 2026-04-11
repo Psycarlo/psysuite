@@ -49,7 +49,9 @@ export const createBudget = (
       now
     ]
   )
-  return result.insertId ? getBudgetById(db, result.insertId) : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getBudgetById(db, result.insertId)
 }
 
 export const updateBudget = (
@@ -95,6 +97,7 @@ export const deleteBudget = (db: NitroSQLiteConnection, id: number): void => {
 }
 
 interface BudgetProgress {
+  [key: string]: number
   spent: number
 }
 

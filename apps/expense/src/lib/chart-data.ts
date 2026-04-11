@@ -5,7 +5,8 @@ interface DailySpending {
   total: number
 }
 
-interface ChartPoint {
+export interface ChartPoint {
+  [key: string]: unknown
   label: string
   amount: number
 }
@@ -29,7 +30,7 @@ const SHORT_MONTHS = [
 const buildWeekData = (data: DailySpending[]): ChartPoint[] => {
   const buckets = new Map<string, number>()
 
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 7; i += 1) {
     buckets.set(SHORT_DAYS[i], 0)
   }
 
@@ -40,8 +41,8 @@ const buildWeekData = (data: DailySpending[]): ChartPoint[] => {
   }
 
   return SHORT_DAYS.map((day) => ({
-    label: day,
-    amount: buckets.get(day) ?? 0
+    amount: buckets.get(day) ?? 0,
+    label: day
   }))
 }
 
@@ -61,8 +62,8 @@ const buildMonthData = (data: DailySpending[]): ChartPoint[] => {
   }
 
   const points: ChartPoint[] = []
-  for (let d = 1; d <= daysInMonth; d++) {
-    points.push({ label: `${d}`, amount: buckets.get(d) ?? 0 })
+  for (let d = 1; d <= daysInMonth; d += 1) {
+    points.push({ amount: buckets.get(d) ?? 0, label: `${d}` })
   }
   return points
 }
@@ -77,8 +78,8 @@ const buildYearData = (data: DailySpending[]): ChartPoint[] => {
   }
 
   return SHORT_MONTHS.map((name, i) => ({
-    label: name,
-    amount: buckets.get(i) ?? 0
+    amount: buckets.get(i) ?? 0,
+    label: name
   }))
 }
 
@@ -91,21 +92,21 @@ const buildAllTimeData = (data: DailySpending[]): ChartPoint[] => {
     buckets.set(year, (buckets.get(year) ?? 0) + entry.total)
   }
 
-  const years = [...buckets.keys()].sort((a, b) => a - b)
+  const years = [...buckets.keys()].toSorted((a, b) => a - b)
   if (years.length === 0) {
     const currentYear = new Date().getFullYear()
-    return [{ label: `${currentYear}`, amount: 0 }]
+    return [{ amount: 0, label: `${currentYear}` }]
   }
 
   return years.map((year) => ({
-    label: `${year}`,
-    amount: buckets.get(year) ?? 0
+    amount: buckets.get(year) ?? 0,
+    label: `${year}`
   }))
 }
 
 const buildTodayData = (data: DailySpending[]): ChartPoint[] => {
   const total = data.reduce((sum, d) => sum + d.total, 0)
-  return [{ label: 'Today', amount: total }]
+  return [{ amount: total, label: 'Today' }]
 }
 
 export const buildChartData = (
@@ -113,15 +114,23 @@ export const buildChartData = (
   period: Period
 ): ChartPoint[] => {
   switch (period) {
-    case 'today':
+    case 'today': {
       return buildTodayData(data)
-    case 'this_week':
+    }
+    case 'this_week': {
       return buildWeekData(data)
-    case 'this_month':
+    }
+    case 'this_month': {
       return buildMonthData(data)
-    case 'this_year':
+    }
+    case 'this_year': {
       return buildYearData(data)
-    case 'all_time':
+    }
+    case 'all_time': {
       return buildAllTimeData(data)
+    }
+    default: {
+      return period satisfies never
+    }
   }
 }

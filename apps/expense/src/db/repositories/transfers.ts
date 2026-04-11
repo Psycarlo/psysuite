@@ -32,7 +32,9 @@ export const createTransfer = (
     'INSERT INTO transfers (from_entry_id, to_entry_id, exchange_rate, created_at) VALUES (?, ?, ?, ?)',
     [params.from_entry_id, params.to_entry_id, params.exchange_rate ?? 1, now]
   )
-  return result.insertId ? getTransferById(db, result.insertId) : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getTransferById(db, result.insertId)
 }
 
 export const deleteTransfer = (db: NitroSQLiteConnection, id: number): void => {

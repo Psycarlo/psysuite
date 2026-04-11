@@ -1,6 +1,7 @@
 export type CategoryType = 'expense' | 'income'
 
 export interface Category {
+  [key: string]: number | string | null
   id: number
   name: string
   icon: string | null

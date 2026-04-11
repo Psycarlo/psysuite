@@ -1,15 +1,12 @@
 import { useFont } from '@shopify/react-native-skia'
+import type { DataSourceParam } from '@shopify/react-native-skia'
 import { View } from 'react-native'
 import { Bar, CartesianChart } from 'victory-native'
 
-// eslint-disable-next-line unicorn/prefer-module
-const fontFile = require('../../assets/fonts/InterTight-Medium.ttf')
+import type { ChartPoint } from '@/lib/chart-data'
 
-interface ChartPoint {
-  label: string
-  amount: number
-  [key: string]: unknown
-}
+// oxlint-disable-next-line unicorn/prefer-module, typescript-eslint/no-unsafe-assignment
+const fontFile: DataSourceParam = require('../../assets/fonts/InterTight-Medium.ttf')
 
 interface SpendingChartProps {
   data: ChartPoint[]
@@ -30,11 +27,11 @@ export const SpendingChart = ({ data }: SpendingChartProps) => {
         yKeys={['amount']}
         domainPadding={{ left: 30, right: 30 }}
         axisOptions={{
+          axisSide: { x: 'bottom', y: 'left' },
           font,
           labelColor: '#a1a1aa',
           lineColor: '#e4e4e7',
-          tickCount: { x: data.length, y: 0 },
-          axisSide: { x: 'bottom', y: 'left' }
+          tickCount: { x: data.length, y: 0 }
         }}
         frame={{ lineColor: 'transparent' }}
       >

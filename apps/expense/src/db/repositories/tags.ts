@@ -35,7 +35,9 @@ export const createTag = (
     'INSERT INTO tags (name, color, created_at) VALUES (?, ?, ?)',
     [params.name, params.color ?? null, now]
   )
-  return result.insertId ? getTagById(db, result.insertId) : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getTagById(db, result.insertId)
 }
 
 export const updateTag = (

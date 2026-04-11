@@ -14,14 +14,15 @@
     "packages/*"
   ],
   "scripts": {
-    "check": "ultracite check",
-    "fix": "ultracite fix"
+    "check": "ultracite check --type-aware --type-check",
+    "fix": "ultracite fix --type-aware --type-check"
   },
   "dependencies": {},
   "devDependencies": {
     "oxfmt": "^0.41.0",
     "oxlint": "^1.56.0",
-    "ultracite": "7.3.2"
+    "oxlint-tsgolint": "^0.20.0",
+    "ultracite": "7.4.4"
   },
   "resolutions": {
     "hermes-compiler": "250829098.0.4"

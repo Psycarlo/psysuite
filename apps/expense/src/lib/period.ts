@@ -26,40 +26,59 @@ export const getDateRange = (period: Period): DateRange | undefined => {
       start = new Date(now.getFullYear(), 0, 1)
       break
     }
+    default: {
+      return undefined
+    }
   }
 
   return {
-    start: Math.floor(start.getTime() / 1000),
-    end: Math.floor(now.getTime() / 1000)
+    end: Math.floor(now.getTime() / 1000),
+    start: Math.floor(start.getTime() / 1000)
   }
 }
 
 export const getPeriodLabel = (period: Period): string => {
   switch (period) {
-    case 'today':
+    case 'today': {
       return 'Spent today'
-    case 'this_week':
+    }
+    case 'this_week': {
       return 'Spent this week'
-    case 'this_month':
+    }
+    case 'this_month': {
       return 'Spent this month'
-    case 'this_year':
+    }
+    case 'this_year': {
       return 'Spent this year'
-    case 'all_time':
+    }
+    case 'all_time': {
       return 'Total spending'
+    }
+    default: {
+      return period satisfies never
+    }
   }
 }
 
 export const getPeriodDisplayName = (period: Period): string => {
   switch (period) {
-    case 'today':
+    case 'today': {
       return 'Today'
-    case 'this_week':
+    }
+    case 'this_week': {
       return 'This week'
-    case 'this_month':
+    }
+    case 'this_month': {
       return 'This month'
-    case 'this_year':
+    }
+    case 'this_year': {
       return 'This year'
-    case 'all_time':
+    }
+    case 'all_time': {
       return 'All time'
+    }
+    default: {
+      return period satisfies never
+    }
   }
 }

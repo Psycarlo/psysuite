@@ -7,6 +7,7 @@ export type PaymentMethodType =
   | 'other'
 
 export interface PaymentMethod {
+  [key: string]: number | string | null
   id: number
   name: string
   type: PaymentMethodType

@@ -1,4 +1,5 @@
 export interface Account {
+  [key: string]: number | string | null
   id: number
   name: string
   currency_code: string

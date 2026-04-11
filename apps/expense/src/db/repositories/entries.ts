@@ -57,7 +57,9 @@ export const createEntry = (
       now
     ]
   )
-  return result.insertId ? getEntryById(db, result.insertId) : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getEntryById(db, result.insertId)
 }
 
 export const updateEntry = (
@@ -116,66 +118,76 @@ export const deleteEntry = (db: NitroSQLiteConnection, id: number): void => {
 
 export const getEntries = (
   db: NitroSQLiteConnection,
+  accountId: number,
   startDate?: number,
   endDate?: number
 ): Entry[] => {
   if (startDate !== undefined && endDate !== undefined) {
     const result = db.execute<Entry>(
-      'SELECT * FROM entries WHERE date >= ? AND date <= ? ORDER BY date DESC',
-      [startDate, endDate]
+      'SELECT * FROM entries WHERE account_id = ? AND date >= ? AND date <= ? ORDER BY date DESC',
+      [accountId, startDate, endDate]
     )
     return result.rows._array
   }
-  const result = db.execute<Entry>('SELECT * FROM entries ORDER BY date DESC')
+  const result = db.execute<Entry>(
+    'SELECT * FROM entries WHERE account_id = ? ORDER BY date DESC',
+    [accountId]
+  )
   return result.rows._array
 }
 
 interface SpendingTotal {
+  [key: string]: number | null
   total: number | null
 }
 
 export const getTotalSpending = (
   db: NitroSQLiteConnection,
+  accountId: number,
   startDate?: number,
   endDate?: number
 ): number => {
   if (startDate !== undefined && endDate !== undefined) {
     const result = db.execute<SpendingTotal>(
-      "SELECT SUM(amount) as total FROM entries WHERE type = 'expense' AND date >= ? AND date <= ?",
-      [startDate, endDate]
+      "SELECT SUM(amount) as total FROM entries WHERE account_id = ? AND type = 'expense' AND date >= ? AND date <= ?",
+      [accountId, startDate, endDate]
     )
     return result.rows.item(0)?.total ?? 0
   }
   const result = db.execute<SpendingTotal>(
-    "SELECT SUM(amount) as total FROM entries WHERE type = 'expense'"
+    "SELECT SUM(amount) as total FROM entries WHERE account_id = ? AND type = 'expense'",
+    [accountId]
   )
   return result.rows.item(0)?.total ?? 0
 }
 
 interface DailySpending {
+  [key: string]: number
   day: number
   total: number
 }
 
 export const getDailySpending = (
   db: NitroSQLiteConnection,
+  accountId: number,
   startDate: number,
   endDate: number
 ): DailySpending[] => {
   const result = db.execute<DailySpending>(
     `SELECT date as day, SUM(amount) as total
      FROM entries
-     WHERE type = 'expense' AND date >= ? AND date <= ?
+     WHERE account_id = ? AND type = 'expense' AND date >= ? AND date <= ?
      GROUP BY date
      ORDER BY date`,
-    [startDate, endDate]
+    [accountId, startDate, endDate]
   )
   return result.rows._array
 }
 
 interface MonthlySummary {
-  category_id: number | null
+  [key: string]: number | null
   total: number
+  category_id: number | null
 }
 
 export const getMonthlySummary = (

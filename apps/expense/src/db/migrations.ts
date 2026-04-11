@@ -32,7 +32,8 @@ export const runMigrations = async (
   const pending = migrations.filter((m) => m.version > currentVersion)
 
   for (const migration of pending) {
-    await db.transaction((tx) => {
+    // oxlint-disable-next-line require-await -- library type requires Promise<void> callback
+    await db.transaction(async (tx) => {
       migration.up(db)
 
       const now = Math.floor(Date.now() / 1000)

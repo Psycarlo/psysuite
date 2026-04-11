@@ -6,6 +6,7 @@ export type RecurringFrequency =
   | 'yearly'
 
 export interface RecurringEntry {
+  [key: string]: number | string | null
   id: number
   account_id: number
   category_id: number | null

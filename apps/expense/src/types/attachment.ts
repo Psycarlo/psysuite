@@ -1,4 +1,5 @@
 export interface Attachment {
+  [key: string]: number | string | null
   id: number
   entry_id: number
   file_path: string

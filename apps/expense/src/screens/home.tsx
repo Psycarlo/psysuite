@@ -32,8 +32,8 @@ import type { Period } from '@/types/period'
 const loadData = (period: Period, accountId: number) => {
   const db = getDatabase()
   const range = getDateRange(period)
-  const total = getTotalSpending(db, range?.start, range?.end)
-  const entries = getEntries(db, range?.start, range?.end)
+  const total = getTotalSpending(db, accountId, range?.start, range?.end)
+  const entries = getEntries(db, accountId, range?.start, range?.end)
 
   const now = new Date()
   const weekStart = new Date(
@@ -42,16 +42,25 @@ const loadData = (period: Period, accountId: number) => {
     now.getDate() - now.getDay()
   )
   const defaultRange = {
-    start: Math.floor(weekStart.getTime() / 1000),
-    end: Math.floor(now.getTime() / 1000)
+    end: Math.floor(now.getTime() / 1000),
+    start: Math.floor(weekStart.getTime() / 1000)
   }
 
   const chartRange = range ?? defaultRange
-  const dailySpending = getDailySpending(db, chartRange.start, chartRange.end)
+  const dailySpending = getDailySpending(
+    db,
+    accountId,
+    chartRange.start,
+    chartRange.end
+  )
   const chartData = buildChartData(dailySpending, period)
 
-  return { total, entries, chartData }
+  return { chartData, entries, total }
 }
+
+const renderItem = ({ item }: { item: Entry }) => (
+  <TransactionItem entry={item} />
+)
 
 export const HomeScreen = () => {
   const insets = useSafeAreaInsets()
@@ -76,10 +85,10 @@ export const HomeScreen = () => {
   const handleSaveExpense = (title: string, amount: number, date: number) => {
     createEntry(db, {
       account_id: selectedAccountId,
-      type: 'expense',
       amount,
+      date,
       title,
-      date
+      type: 'expense'
     })
     setExpenseModalVisible(false)
     refreshData()
@@ -111,15 +120,13 @@ export const HomeScreen = () => {
 
   const selectedAccount = accounts.find((a) => a.id === selectedAccountId)
 
-  const renderItem = ({ item }: { item: Entry }) => (
-    <TransactionItem entry={item} />
-  )
-
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
       <View className="flex-row items-center justify-between px-5 py-3">
         <Pressable
-          onPress={() => setAccountModalVisible(true)}
+          onPress={() => {
+            setAccountModalVisible(true)
+          }}
           className="flex-row items-center gap-1.5 border border-zinc-200 rounded-full px-4 py-2"
         >
           <Text className="text-sm font-semibold text-black">
@@ -131,7 +138,11 @@ export const HomeScreen = () => {
           <Pressable>
             <Search size={22} color="#000" />
           </Pressable>
-          <Pressable onPress={() => setFilterModalVisible(true)}>
+          <Pressable
+            onPress={() => {
+              setFilterModalVisible(true)
+            }}
+          >
             <ListFilter size={22} color="#000" />
           </Pressable>
         </View>
@@ -140,7 +151,6 @@ export const HomeScreen = () => {
       <FlashList
         data={data.entries}
         renderItem={renderItem}
-        estimatedItemSize={64}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ paddingHorizontal: 20 }}
         ListHeaderComponent={
@@ -163,18 +173,26 @@ export const HomeScreen = () => {
         ListFooterComponent={<View className="h-24" />}
       />
 
-      <Fab onPress={() => setExpenseModalVisible(true)} />
+      <Fab
+        onPress={() => {
+          setExpenseModalVisible(true)
+        }}
+      />
 
       <NewExpenseModal
         visible={expenseModalVisible}
-        onClose={() => setExpenseModalVisible(false)}
+        onClose={() => {
+          setExpenseModalVisible(false)
+        }}
         onSave={handleSaveExpense}
       />
       <FilterModal
         visible={filterModalVisible}
         selected={period}
         onSelect={handlePeriodSelect}
-        onClose={() => setFilterModalVisible(false)}
+        onClose={() => {
+          setFilterModalVisible(false)
+        }}
       />
       <AccountModal
         visible={accountModalVisible}
@@ -183,7 +201,9 @@ export const HomeScreen = () => {
         onSelect={handleSelectAccount}
         onCreate={handleCreateAccount}
         onDelete={handleDeleteAccount}
-        onClose={() => setAccountModalVisible(false)}
+        onClose={() => {
+          setAccountModalVisible(false)
+        }}
       />
     </View>
   )

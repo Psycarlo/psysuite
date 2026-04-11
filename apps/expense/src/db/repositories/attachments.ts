@@ -40,7 +40,9 @@ export const createAttachment = (
       now
     ]
   )
-  return result.insertId ? getAttachmentById(db, result.insertId) : undefined
+  return result.insertId === undefined
+    ? undefined
+    : getAttachmentById(db, result.insertId)
 }
 
 export const deleteAttachment = (

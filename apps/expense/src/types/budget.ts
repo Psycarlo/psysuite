@@ -1,6 +1,7 @@
 export type BudgetPeriod = 'weekly' | 'monthly' | 'yearly'
 
 export interface Budget {
+  [key: string]: number | string | null
   id: number
   account_id: number | null
   category_id: number | null

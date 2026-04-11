@@ -30,7 +30,9 @@ export const NewExpenseModal = ({
   const canSave = title.trim().length > 0 && Number.parseFloat(amount) > 0
 
   const handleSave = () => {
-    if (!canSave) return
+    if (!canSave) {
+      return
+    }
     const timestamp = Math.floor(date.getTime() / 1000)
     onSave(title.trim(), Number.parseFloat(amount), timestamp)
     resetForm()

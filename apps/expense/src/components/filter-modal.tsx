@@ -53,7 +53,9 @@ export const FilterModal = ({
           {PERIODS.map((period) => (
             <Pressable
               key={period}
-              onPress={() => handleSelect(period)}
+              onPress={() => {
+                handleSelect(period)
+              }}
               className="flex-row items-center justify-between py-4 border-b border-zinc-100"
             >
               <Text className="text-base text-black">

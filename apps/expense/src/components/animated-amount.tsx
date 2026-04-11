@@ -6,6 +6,7 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated'
 
+// oxlint-disable-next-line import/no-named-as-default-member
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput)
 
 interface AnimatedAmountProps {
@@ -14,11 +15,11 @@ interface AnimatedAmountProps {
 
 const styles = StyleSheet.create({
   text: {
+    color: '#000',
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#000',
-    padding: 0,
-    marginBottom: 16
+    marginBottom: 16,
+    padding: 0
   }
 })
 
@@ -27,11 +28,11 @@ export const AnimatedAmount = ({ value }: AnimatedAmountProps) => {
 
   useEffect(() => {
     animatedValue.value = withTiming(value, { duration: 600 })
-  }, [value])
+  }, [value, animatedValue])
 
   const animatedProps = useAnimatedProps(() => {
     const formatted = `$${animatedValue.value.toFixed(2)}`
-    return { text: formatted, defaultValue: formatted }
+    return { defaultValue: formatted, text: formatted }
   })
 
   return (
