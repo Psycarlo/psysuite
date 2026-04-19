@@ -49,9 +49,9 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
     case 'populate': {
       return {
         costBasis:
-          action.holding.cost_basis !== null
-            ? String(action.holding.cost_basis)
-            : '',
+          action.holding.cost_basis === null
+            ? ''
+            : String(action.holding.cost_basis),
         name: action.holding.name ?? '',
         quantity: String(action.holding.quantity),
         symbol: action.holding.symbol,

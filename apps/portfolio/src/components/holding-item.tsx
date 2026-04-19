@@ -16,9 +16,10 @@ export const HoldingItem = ({
 }: HoldingItemProps) => {
   const value = currentPrice * holding.quantity
   const cost =
-    holding.cost_basis !== null ? holding.cost_basis * holding.quantity : null
-  const pnl = cost !== null ? value - cost : null
-  const pnlPercent = cost !== null && cost > 0 ? (value / cost - 1) * 100 : null
+    holding.cost_basis === null ? null : holding.cost_basis * holding.quantity
+  const pnl = cost === null ? null : value - cost
+  const pnlPercent =
+    cost === null || cost <= 0 ? null : (value / cost - 1) * 100
 
   const Icon = holding.type === 'bitcoin' ? Bitcoin : TrendingUp
 

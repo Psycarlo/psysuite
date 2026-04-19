@@ -88,22 +88,23 @@ export const HomeScreen = () => {
     editingHolding: null
   })
   const [refreshing, setRefreshing] = useState(false)
+  const [refreshTick, setRefreshTick] = useState(0)
 
   const refreshData = (newPeriod?: Period, portfolioId?: number) => {
     setData(loadData(newPeriod ?? period, portfolioId ?? selectedPortfolioId))
   }
 
-  // oxlint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const run = async () => {
       setRefreshing(true)
+      const holdings = getHoldingsByPortfolio(db, selectedPortfolioId)
       const days = getPeriodDays(period)
-      await refreshAllPrices(db, data.holdings, days)
-      refreshData()
+      await refreshAllPrices(db, holdings, days)
+      setData(loadData(period, selectedPortfolioId))
       setRefreshing(false)
     }
     void run()
-  }, [period, selectedPortfolioId])
+  }, [period, selectedPortfolioId, refreshTick, db])
 
   const handleSaveHolding = (params: HoldingModalSaveParams) => {
     if (modal.editingHolding) {
@@ -124,13 +125,13 @@ export const HomeScreen = () => {
       })
     }
     dispatch({ type: 'close' })
-    refreshData()
+    setRefreshTick((t) => t + 1)
   }
 
   const handleDeleteHolding = (id: number) => {
     deleteHolding(db, id)
     dispatch({ type: 'close' })
-    refreshData()
+    setRefreshTick((t) => t + 1)
   }
 
   const handleHoldingPress = (holding: Holding) => {

@@ -18,6 +18,15 @@ const normalizeToDayStart = (timestamp: number): number => {
   return Math.floor(date.getTime() / 1000)
 }
 
+const hasKey = <K extends string>(
+  value: unknown,
+  key: K
+): value is Record<K, unknown> =>
+  typeof value === 'object' && value !== null && key in value
+
+const isBinancePrice = (value: unknown): value is { price: string } =>
+  hasKey(value, 'price') && typeof value.price === 'string'
+
 const fetchBinanceCurrent = async (): Promise<number> => {
   const response = await fetch(
     `https://api.binance.com/api/v3/ticker/price?symbol=${BINANCE_BTC_SYMBOL}`
@@ -25,9 +34,23 @@ const fetchBinanceCurrent = async (): Promise<number> => {
   if (!response.ok) {
     throw new Error(`Binance request failed: ${response.status}`)
   }
-  const data = (await response.json()) as { price: string }
+  const data: unknown = await response.json()
+  if (!isBinancePrice(data)) {
+    throw new Error('Binance price shape invalid')
+  }
   return Number.parseFloat(data.price)
 }
+
+type BinanceKline = [number, string, string, string, string, ...unknown[]]
+
+const isBinanceKline = (value: unknown): value is BinanceKline =>
+  Array.isArray(value) &&
+  value.length >= 5 &&
+  typeof value[0] === 'number' &&
+  typeof value[4] === 'string'
+
+const isBinanceKlines = (value: unknown): value is BinanceKline[] =>
+  Array.isArray(value) && value.every(isBinanceKline)
 
 const fetchBinanceHistory = async (days: number): Promise<PricePoint[]> => {
   const limit = Math.min(days + 1, 1000)
@@ -37,30 +60,66 @@ const fetchBinanceHistory = async (days: number): Promise<PricePoint[]> => {
   if (!response.ok) {
     throw new Error(`Binance klines failed: ${response.status}`)
   }
-  const data = (await response.json()) as [
-    number,
-    string,
-    string,
-    string,
-    string,
-    ...unknown[]
-  ][]
+  const data: unknown = await response.json()
+  if (!isBinanceKlines(data)) {
+    throw new Error('Binance klines shape invalid')
+  }
   return data.map((row) => ({
     price: Number.parseFloat(row[4]),
     timestamp: normalizeToDayStart(Math.floor(row[0] / 1000))
   }))
 }
 
+interface YahooResultEntry {
+  timestamp: number[]
+  indicators: { quote: { close: (number | null)[] }[] }
+}
+
 interface YahooChartResult {
   chart: {
-    result:
-      | {
-          timestamp: number[]
-          indicators: { quote: { close: (number | null)[] }[] }
-        }[]
-      | null
+    result: YahooResultEntry[] | null
     error: unknown
   }
+}
+
+const isNumberArray = (value: unknown): value is number[] =>
+  Array.isArray(value) && value.every((v) => typeof v === 'number')
+
+const isCloseArray = (value: unknown): value is (number | null)[] =>
+  Array.isArray(value) &&
+  value.every((v) => v === null || typeof v === 'number')
+
+const isUnknownArray = (value: unknown): value is unknown[] =>
+  Array.isArray(value)
+
+const isYahooResultEntry = (value: unknown): value is YahooResultEntry => {
+  if (!(hasKey(value, 'timestamp') && hasKey(value, 'indicators'))) {
+    return false
+  }
+  if (!isNumberArray(value.timestamp)) {
+    return false
+  }
+  const { indicators } = value
+  if (!hasKey(indicators, 'quote') || !isUnknownArray(indicators.quote)) {
+    return false
+  }
+  const [firstQuote] = indicators.quote
+  return hasKey(firstQuote, 'close') && isCloseArray(firstQuote.close)
+}
+
+const isYahooChartResult = (value: unknown): value is YahooChartResult => {
+  if (!hasKey(value, 'chart')) {
+    return false
+  }
+  const { chart } = value
+  if (!hasKey(chart, 'result')) {
+    return false
+  }
+  const { result } = chart
+  return (
+    result === null ||
+    (Array.isArray(result) && result.every(isYahooResultEntry))
+  )
 }
 
 const fetchYahoo = async (
@@ -73,7 +132,10 @@ const fetchYahoo = async (
   if (!response.ok) {
     throw new Error(`Yahoo request failed for ${symbol}: ${response.status}`)
   }
-  const data = (await response.json()) as YahooChartResult
+  const data: unknown = await response.json()
+  if (!isYahooChartResult(data)) {
+    throw new Error(`Yahoo shape invalid for ${symbol}`)
+  }
   const result = data.chart.result?.[0]
   if (!result) {
     throw new Error(`Yahoo no data for ${symbol}`)
