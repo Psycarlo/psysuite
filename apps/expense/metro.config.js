@@ -1,4 +1,4 @@
-// oxlint-disable unicorn/prefer-module -- Metro config must use CommonJS; ESM is not supported by Metro
+// oxlint-disable unicorn/prefer-module, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-argument -- Metro config must use CommonJS
 const { getDefaultConfig } = require('expo/metro-config')
 const { withUniwindConfig } = require('uniwind/metro')
 

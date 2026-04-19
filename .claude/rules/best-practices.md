@@ -1,6 +1,6 @@
 ---
 paths:
-  - "apps/**/*.{ts,tsx}"
+  - 'apps/**/*.{ts,tsx}'
 ---
 
 # Best Practices

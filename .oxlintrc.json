@@ -6,7 +6,8 @@
     "./node_modules/ultracite/config/oxlint/vitest/.oxlintrc.json"
   ],
   "rules": {
-    "no-use-before-define": "off"
+    "no-use-before-define": "off",
+    "react-perf/jsx-no-new-function-as-prop": "off"
   },
   "overrides": [
     {

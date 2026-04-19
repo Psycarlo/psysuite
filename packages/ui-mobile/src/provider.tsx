@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font'
 import { HeroUINativeProvider } from 'heroui-native'
 import type { ReactNode } from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 interface ProviderProps {
   children: ReactNode
@@ -26,8 +27,10 @@ export const Provider = ({ children }: ProviderProps) => {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <HeroUINativeProvider>{children}</HeroUINativeProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <HeroUINativeProvider>{children}</HeroUINativeProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   )
 }
